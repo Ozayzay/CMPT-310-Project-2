@@ -77,11 +77,10 @@ def minmax_cutoff(game, state, depth):
     
 
     def max_value(state, depth):
-        if depth == 0:
+        if depth == 0 or game.terminal_test(state):
             return game.evaluation_func(state)
-        # If terminal state then return utility/value of state
-        if game.terminal_test(state):
-            return game.utility(state, player)
+        
+        
         maxValue = -np.inf 
         #for child in possible actions from state find the max value of the child
         #By calling min_value recursively
@@ -90,10 +89,8 @@ def minmax_cutoff(game, state, depth):
         return maxValue
     
     def min_value(state, depth):
-        if depth == 0:
+        if depth == 0 or game.terminal_test(state):
             return game.evaluation_func(state)
-        if game.terminal_test(state):
-            return game.utility(state, player)
         minValue = np.inf
         for a in game.actions(state):
             minValue = min(minValue, max_value(game.result(state, a), depth - 1))
@@ -363,7 +360,7 @@ class TicTacToe(Game):
         # Any thing else means its a win or a draw
         return state.utility != 0 or len(state.moves) == 0
     
-    
+
     def display(self, state):
         board = state.board
         for x in range(1, self.h + 1):
@@ -394,11 +391,9 @@ class TicTacToe(Game):
         
         # Check for winning moves
         if state.utility == self.k:
-            print("X wins!!!!!!!!!!!!!!!!!!")
             return float('inf') if player == 'X' else float('-inf')
             
         elif state.utility == -self.k:
-            print("O wins!!!!!!!!!!!!!!!!!!")
             return float('-inf') if player == 'X' else float('inf')
             
         
