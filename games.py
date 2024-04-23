@@ -362,7 +362,8 @@ class TicTacToe(Game):
         # if state.utillity 0 means its a draw and hence all squares filled up
         # Any thing else means its a win or a draw
         return state.utility != 0 or len(state.moves) == 0
-
+    
+    
     def display(self, state):
         board = state.board
         for x in range(1, self.h + 1):
