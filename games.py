@@ -79,8 +79,6 @@ def minmax_cutoff(game, state, depth):
     def max_value(state, depth):
         if depth == 0 or game.terminal_test(state):
             return game.evaluation_func(state)
-        
-        
         maxValue = -np.inf 
         #for child in possible actions from state find the max value of the child
         #By calling min_value recursively
@@ -179,34 +177,35 @@ def alpha_beta_search(game, state):
     return best_action
 
 
-def alpha_beta_cutoff_search(game, state, d=4, cutoff_test=None, eval_fn=None):
+def alpha_beta_cutoff_search(game, state, depth):
     """Search game to determine best action; use alpha-beta pruning.
     This version cuts off search and uses an evaluation function."""
-    print("alpha_beta_cutoff_search: may be used, if so, must be implemented by students")
     
     player = game.to_move(state)
     alpha = -np.inf
     beta = np.inf
 
+    print ("alpha_beta_cutoff_search: Cutoff depth is:", depth)
+
     # Functions used by alpha_beta
-    def max_value(state, alpha, beta):
-        if game.terminal_test(state):
-            return game.utility(state, player)
+    def max_value(state, alpha, beta, depth):
+        if depth == 0 or game.terminal_test(state):
+            return game.evaluation_func(state)
         v = -np.inf
         for a in game.actions(state):
-            v = max(v, min_value(game.result(state, a), alpha, beta))
+            v = max(v, min_value(game.result(state, a), alpha, beta,depth -1 ))
             alpha = max(alpha, v)
             #prune
             if alpha >= beta:
                 return v
         return v
 
-    def min_value(state, alpha, beta):
-        if game.terminal_test(state):
-            return game.utility(state, player)
+    def min_value(state, alpha, beta,depth):
+        if depth == 0 or game.terminal_test(state):
+            return game.evaluation_func(state)
         v = np.inf
         for a in game.actions(state):
-            v = min(v, max_value(game.result(state, a), alpha, beta))
+            v = min(v, max_value(game.result(state, a), alpha, beta,depth -1 ))
             beta = min(beta, v)
             #Prune
             if beta <= alpha:
@@ -214,7 +213,7 @@ def alpha_beta_cutoff_search(game, state, d=4, cutoff_test=None, eval_fn=None):
         return v
 
     # Body of alpha_beta_search:
-    best_action = max(game.actions(state), key = lambda a: min_value(game.result(state, a), alpha, beta))
+    best_action = max(game.actions(state), key = lambda a: min_value(game.result(state, a), alpha, beta ,depth))
 
     return best_action
 # ______________________________________________________________________________
@@ -245,7 +244,9 @@ def random_player(game, state):
 
 
 def alpha_beta_player(game, state):
-    return alpha_beta_search(game, state)
+    if( game.d == -1):
+        return alpha_beta_search(game, state)
+    return alpha_beta_cutoff_search(game, state, game.d)
 
 # If game.depth is -1 then minmax_player will be used i.e no depth limiting
 # If game.depth is 0 then minmax_player will be used i.e depth limiting
