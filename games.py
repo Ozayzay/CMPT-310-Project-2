@@ -12,7 +12,7 @@ import numpy as np
 #https://www.youtube.com/watch?v=l-hh51ncgDI
 #https://www.youtube.com/watch?v=trKjYdBASyQ
 #Chapter 5 of our book 
-#
+#https://www.neverstopbuilding.com/blog/minimax
 #
 
 GameState = namedtuple('GameState', 'to_move, utility, board, moves')
@@ -107,36 +107,52 @@ def minmax_cutoff(game, state, depth):
 
 def expect_minmax(game, state):
     """
-    [Figure 5.11]
-    Return the best move for a player after dice are thrown. The game tree
-	includes chance nodes along with min and max nodes.
-	"""
+    The game works better at a depth of 2
+    Works better for the board size of 3
+    
+    
+    For this function to work you will still have to change the depth in the UI so it calls this function.
+    I've implemented the cutoff function differently so in order to call this the depth value has to be changed above  or equal to 0 
+    """
+    
+    
     player = game.to_move(state)
-
-    def max_value(state):
+    depth = game.d
+    
+    def max_value(state, depth):
+        if game.terminal_test(state) or depth == 0:
+            return game.evaluation_func(state)        
         v = -np.inf
         for a in game.actions(state):
-            v = max(v, chance_node(state, a))
+            v = max(v, chance_node(state, a, depth -1))
         return v
-
-    def min_value(state):
+    
+    def min_value(state, depth):
+        if game.terminal_test(state) or depth == 0:
+            return game.evaluation_func(state)        
         v = np.inf
         for a in game.actions(state):
-            v = min(v, chance_node(state, a))
+            v = min(v, chance_node(state, a, depth -1))
         return v
 
-    def chance_node(state, action):
+    def chance_node(state, action, depth):
         res_state = game.result(state, action)
-        if game.terminal_test(res_state):
-            return game.utility(res_state, player)
+        if game.terminal_test(res_state) or depth == 0:
+            return game.evaluation_func(res_state)
         sum_chances = 0
         num_chances = len(game.chances(res_state))
-        print("chance_node: to be completed by students")
-        return 0 
 
-    # Body of expect_minmax:
-    return max(game.actions(state), key=lambda a: chance_node(state, a), default=None)
+        chancestates = game.chances(res_state)
 
+        for cs in chancestates:
+            if game.to_move(res_state) == 'X':
+                sum_chances += 1 / num_chances * max_value(game.result(res_state , cs), depth)
+            else:
+                sum_chances += 1 / num_chances * min_value(game.result(res_state, cs), depth)
+        
+        return sum_chances
+
+    return max(game.actions(state), key=lambda a: chance_node(state, a, depth -1), default=None)
 
 def alpha_beta_search(game, state):
     """Search game to determine best action; use alpha-beta pruning.
@@ -181,6 +197,8 @@ def alpha_beta_cutoff_search(game, state, depth):
     """Search game to determine best action; use alpha-beta pruning.
     This version cuts off search and uses an evaluation function."""
     
+    # Depth is now set from the UI and not hard coded into this function 
+
     player = game.to_move(state)
     alpha = -np.inf
     beta = np.inf
@@ -470,6 +488,8 @@ class TicTacToe(Game):
     def chances(self, state):
         """Return a list of all possible states."""
         chances = []
+        for moves in state.moves:
+            chances.append(moves)
         return chances
     
 class Gomoku(TicTacToe):

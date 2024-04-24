@@ -21,7 +21,10 @@ choices = None
 gheight = 4
 gwidth = 4
 gkmatch = 4
+# note ----------
+# Please read pdf for explanation of different depths for different algorithms at different sizes  
 gdepth = -1 # -1 means search cutoff depth set to leaf level.
+
 
 
 
@@ -281,7 +284,7 @@ if __name__ == "__main__":
         gwidth =  int(sys.argv[2])
         gkmatch = int(sys.argv[3])
     else:
-        gheight = gwidth = 4
+        gheight = gwidth = 6
         gkmatch = 4
 
     root = Tk()
